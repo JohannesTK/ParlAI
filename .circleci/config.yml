@@ -24,7 +24,14 @@ fixgit: &fixgit
   run:
     name: Fixes git
     command: |
-      ( [[ "$CIRCLE_BRANCH" != "master" ]] && git branch -f master origin/master ) || true
+      if [[ "$CIRCLE_BRANCH" != "master" ]]
+      then
+        git branch -f master origin/master
+        git checkout master
+        git merge --squash "$CIRCLE_BRANCH" --commit -m "Squash." || git checkout -f "$CIRCLE_BRANCH"
+      fi
+      git status
+      git log --oneline HEAD~10..HEAD
 
 setup: &setup
   run:
@@ -74,6 +81,11 @@ setupcuda: &setupcuda
       nvidia-smi
       pyenv global 3.6.5
 
+buildwebsite: &buildwebsite
+  run:
+    working_directory: ~/ParlAI/website
+    name: Build the website
+    command: make
 
 # -------------------------------------------------------------------------------------
 # Actual jobs
@@ -164,6 +176,17 @@ jobs:
           name: All mturk tests
           command: python setup.py test -s tests.suites.mturk -v
 
+  build_website:
+    <<: *standard_cpu
+    working_directory: ~/ParlAI
+    steps:
+      - checkout
+      - <<: *fixgit
+      - <<: *setup
+      - <<: *installdeps
+      - <<: *installtorchcpu
+      - <<: *buildwebsite
+
   deploy_website:
     <<: *standard_cpu
     working_directory: ~/ParlAI
@@ -173,10 +196,7 @@ jobs:
       - <<: *setup
       - <<: *installdeps
       - <<: *installtorchcpu
-      - run:
-          working_directory: ~/ParlAI/website
-          name: Build the website
-          command: make
+      - <<: *buildwebsite
       - run:
           working_directory: ~/ParlAI/
           name: Upload the website
@@ -219,7 +239,10 @@ workflows:
       - lint
       - unittests
       - check_extra_tests
+      - build_website
       - deploy_website:
+          requires:
+            - build_website
           filters:
             branches:
               only: master
