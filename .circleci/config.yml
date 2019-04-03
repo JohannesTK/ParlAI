@@ -26,6 +26,9 @@ fixgit: &fixgit
     command: |
       if [[ "$CIRCLE_BRANCH" != "master" ]]
       then
+        git config --global user.email "circleci@parl.ai"
+        git config --global user.name "CircleCI"
+
         git branch -f master origin/master
         git merge master --commit || git checkout -f "$CIRCLE_BRANCH"
       fi
