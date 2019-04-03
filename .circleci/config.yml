@@ -27,8 +27,7 @@ fixgit: &fixgit
       if [[ "$CIRCLE_BRANCH" != "master" ]]
       then
         git branch -f master origin/master
-        git checkout master
-        git merge --squash "$CIRCLE_BRANCH" --commit -m "Squash." || git checkout -f "$CIRCLE_BRANCH"
+        git merge master --commit || git checkout -f "$CIRCLE_BRANCH"
       fi
       git status
       git log --oneline HEAD~10..HEAD
