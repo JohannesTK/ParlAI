@@ -6,9 +6,9 @@
 Using tensorboard for metric tracking
 =====================================
 
-ParlAI uses tensorboardX package which provides tensorflow-free api to write tensorboard event files.
+ParlAI uses tensorboardX package which provides an api to write tensorboard event files.
 One can install it using pip:
-``pip install tensorboardX``
+``pip install tensorboardX`` (You also need TensorFlow).
 
 Default usage inside training loop
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
